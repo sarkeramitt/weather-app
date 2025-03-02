@@ -1,95 +1,87 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client"
+
+import { useState, useEffect, useCallback } from "react"
+import WeatherCard from "../components/WeatherCard"
+import SearchBar from "../components/SearchBar"
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [weatherData, setWeatherData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+  const fetchWeatherData = useCallback(async (searchLocation) => {
+    try {
+      setLoading(true)
+      setError(null)
+      console.log("Fetching weather for location:", searchLocation) // Debug log
+
+      const response = await fetch(`/api/weather?location=${encodeURIComponent(searchLocation)}`)
+      console.log("Response status:", response.status) // Debug log
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch weather data")
+      }
+
+      const data = await response.json()
+      console.log("Received weather data:", data) // Debug log
+
+      if (data.error) {
+        throw new Error(data.error)
+      }
+
+      setWeatherData(data)
+    } catch (err) {
+      console.error("Error fetching weather data:", err)
+      setError(err.message || "Unable to fetch weather data. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords
+          fetchWeatherData(`${latitude},${longitude}`)
+        },
+        (error) => {
+          console.error("Geolocation error:", error)
+          fetchWeatherData("London") // Fallback to a default city
+        },
+      )
+    } else {
+      fetchWeatherData("London") // Fallback if geolocation is not supported
+    }
+  }, [fetchWeatherData])
+
+  const handleSearch = (searchTerm) => {
+    if (searchTerm.trim()) {
+      fetchWeatherData(searchTerm)
+    }
+  }
+
+  return (
+    <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-gray-100 to-gray-300">
+      <div className="w-full max-w-md mb-6">
+        <SearchBar onSearch={handleSearch} />
+      </div>
+
+      {/* Add debug info */}
+      <div className="mb-4 text-sm text-gray-600">
+        Status: {loading ? "Loading..." : error ? "Error" : weatherData ? "Data Ready" : "No Data"}
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+      ) : error ? (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">{error}</div>
+      ) : weatherData ? (
+        <WeatherCard weatherData={weatherData} />
+      ) : null}
+    </main>
+  )
 }
+
