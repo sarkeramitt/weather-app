@@ -3,9 +3,13 @@
 import { useState } from "react"
 
 export default function WeatherCard({ weatherData }) {
+  console.log("WeatherCard received data:", weatherData) // Debug log
   const [unit, setUnit] = useState("celsius") // 'celsius' or 'fahrenheit'
 
-  if (!weatherData) return null
+  if (!weatherData) {
+    console.log("No weather data provided to WeatherCard") // Debug log
+    return null
+  }
 
   const { location, current, hourlyForecast, dailyForecast, lastUpdated } = weatherData
 
