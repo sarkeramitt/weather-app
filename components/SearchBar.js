@@ -83,7 +83,7 @@ export default function SearchBar({ onSearch }) {
             type="submit"
             className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
           >
-            <span className="material-symbols-outlined">{loading ? "sync" : "search"}</span>
+            <span className="material-symbols-rounded">{loading ? "sync" : "search"}</span>
           </button>
         </div>
       </form>
@@ -98,7 +98,7 @@ export default function SearchBar({ onSearch }) {
               onClick={() => handleSuggestionClick(suggestion)}
             >
               <div className="flex items-center">
-                <span className="material-symbols-outlined mr-2">location_on</span>
+                <span className="material-symbols-rounded mr-2">location_on</span>
                 <div>
                   <div className="font-medium">{suggestion.name}</div>
                   <div className="text-sm text-gray-500">

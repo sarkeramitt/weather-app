@@ -3,17 +3,12 @@
 import { useState } from "react"
 
 export default function WeatherCard({ weatherData }) {
-  console.log("WeatherCard received data:", weatherData) // Debug log
-  const [unit, setUnit] = useState("celsius") // 'celsius' or 'fahrenheit'
+  const [unit, setUnit] = useState("celsius")
 
-  if (!weatherData) {
-    console.log("No weather data provided to WeatherCard") // Debug log
-    return null
-  }
+  if (!weatherData) return null
 
   const { location, current, hourlyForecast, dailyForecast, lastUpdated } = weatherData
 
-  // At the start of the component
   if (!weatherData || !hourlyForecast) {
     return (
       <div className="w-full max-w-md rounded-xl shadow-lg bg-gradient-to-br from-blue-500 to-indigo-600 p-6 font-sans overflow-hidden relative">
@@ -27,7 +22,6 @@ export default function WeatherCard({ weatherData }) {
     )
   }
 
-  // Temperature conversion function
   const convertTemp = (temp) => {
     if (unit === "fahrenheit") {
       return Math.round((temp * 9) / 5 + 32)
@@ -35,13 +29,12 @@ export default function WeatherCard({ weatherData }) {
     return Math.round(temp)
   }
 
-  // Weather icon mapping
   const getWeatherIcon = (condition) => {
     const conditionLower = condition.toLowerCase()
     if (conditionLower.includes("sun") || conditionLower.includes("clear")) {
-      return "wb_sunny"
+      return "sunny"
     } else if (conditionLower.includes("cloud") || conditionLower.includes("overcast")) {
-      return conditionLower.includes("partly") ? "cloud" : "cloudy"
+      return conditionLower.includes("partly") ? "partly_cloudy_day" : "cloud"
     } else if (conditionLower.includes("rain") || conditionLower.includes("drizzle")) {
       return "rainy"
     } else if (conditionLower.includes("snow")) {
@@ -53,14 +46,12 @@ export default function WeatherCard({ weatherData }) {
     }
   }
 
-  // Day name from date
   const getDayName = (dateStr) => {
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
     const date = new Date(dateStr)
     return days[date.getDay()]
   }
 
-  // Toggle temperature unit
   const toggleUnit = () => {
     setUnit(unit === "celsius" ? "fahrenheit" : "celsius")
   }
@@ -78,7 +69,7 @@ export default function WeatherCard({ weatherData }) {
       </div>
 
       <div className="flex items-center space-x-3 mb-5">
-        <span className="material-symbols-outlined text-3xl text-white">location_on</span>
+        <span className="material-symbols-rounded text-3xl text-white">location_on</span>
         <h2 className="text-xl font-bold text-white tracking-wide">
           {location.name}, {location.country}
         </h2>
@@ -90,18 +81,25 @@ export default function WeatherCard({ weatherData }) {
             {convertTemp(current.temperature)}°{unit === "celsius" ? "C" : "F"}
           </div>
           <div className="text-blue-100">
-            Feels like {convertTemp(current.feelsLike)}°{unit === "celsius" ? "C" : "F"}
+            {"Feels like "}
+            {convertTemp(current.feelsLike)}°{unit === "celsius" ? "C" : "F"}
           </div>
         </div>
         <div className="text-right">
           <div className="text-white text-xl font-semibold">{current.condition}</div>
-          <div className="text-blue-100">Humidity: {current.humidity}%</div>
-          <div className="text-blue-100">Wind: {current.windSpeed} mph</div>
+          <div className="text-blue-100">
+            {"Humidity: "}
+            {current.humidity}%
+          </div>
+          <div className="text-blue-100">
+            {"Wind: "}
+            {current.windSpeed} mph
+          </div>
         </div>
       </div>
 
       <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-4">
-        <h3 className="text-white font-semibold mb-3">Today's Forecast</h3>
+        <h3 className="text-white font-semibold mb-3">{"Today's Forecast"}</h3>
         <div className="flex justify-between">
           {hourlyForecast?.slice(0, 5).map((hour, index) => (
             <div
@@ -109,7 +107,7 @@ export default function WeatherCard({ weatherData }) {
               className="flex flex-col items-center transform hover:scale-110 transition-transform duration-200"
             >
               <div className="text-sm text-blue-100">{index === 0 ? "Now" : hour.time}</div>
-              <span className="material-symbols-outlined text-yellow-300 my-1">{getWeatherIcon(hour.condition)}</span>
+              <span className="material-symbols-rounded text-yellow-300 my-1">{getWeatherIcon(hour.condition)}</span>
               <div className="text-white font-medium">{convertTemp(hour.temperature)}°</div>
             </div>
           ))}
@@ -117,7 +115,7 @@ export default function WeatherCard({ weatherData }) {
       </div>
 
       <div>
-        <h3 className="text-white font-semibold mb-3">5-Day Forecast</h3>
+        <h3 className="text-white font-semibold mb-3">{"5-Day Forecast"}</h3>
         <div className="space-y-2">
           {dailyForecast.map((day, index) => (
             <div
@@ -135,7 +133,8 @@ export default function WeatherCard({ weatherData }) {
       </div>
 
       <div className="mt-4 text-xs text-center text-blue-100 opacity-80 hover:opacity-100 transition-opacity duration-300">
-        Last updated: {lastUpdated}
+        {"Last updated: "}
+        {lastUpdated}
       </div>
     </div>
   )
